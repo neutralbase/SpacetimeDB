@@ -11,6 +11,24 @@ use thiserror::Error;
 pub mod txdata;
 pub use txdata::Txdata;
 
+/// Pair of transaction offset and payload.
+///
+/// Created by iterators which "flatten" commits into individual transaction
+/// records.
+#[derive(Debug, PartialEq)]
+pub struct Transaction<T> {
+    /// The offset of this transaction relative to the start of the log.
+    pub offset: u64,
+    /// The transaction payload.
+    pub txdata: T,
+}
+
+impl<T> From<(u64, T)> for Transaction<T> {
+    fn from((offset, txdata): (u64, T)) -> Self {
+        Self { offset, txdata }
+    }
+}
+
 /// A **datatype** which can be encoded.
 ///
 /// The transaction payload of the commitlog (i.e. individual records in the log)

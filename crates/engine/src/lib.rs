@@ -1,28 +1,52 @@
+//! With the `native` feature off only [`sql`] builds: the row-level security compiler over the
+//! datastore alone, for an engine that brings its own runtime (wasm32).
+
+#[cfg(feature = "native")]
 pub(crate) mod durability;
+#[cfg(feature = "native")]
 pub mod error;
+#[cfg(feature = "native")]
 pub mod metrics;
+#[cfg(feature = "native")]
 pub mod persistence;
+#[cfg(feature = "native")]
 pub mod relational_db;
+#[cfg(feature = "native")]
 pub mod resource;
+#[cfg(feature = "native")]
 pub mod snapshot;
 pub mod sql;
+#[cfg(feature = "native")]
 pub mod update;
+#[cfg(feature = "native")]
 pub mod util;
 
+#[cfg(feature = "native")]
 use std::sync::Arc;
 
+#[cfg(feature = "native")]
 use enum_map::EnumMap;
+#[cfg(feature = "native")]
 use spacetimedb_datastore::execution_context::WorkloadType;
+#[cfg(feature = "native")]
 use spacetimedb_datastore::locking_tx_datastore::datastore::TxMetrics;
+#[cfg(feature = "native")]
 use spacetimedb_datastore::traits::TxData;
+#[cfg(feature = "native")]
 pub use spacetimedb_lib::identity;
+#[cfg(feature = "native")]
 pub use spacetimedb_lib::Identity;
+#[cfg(feature = "native")]
 use spacetimedb_runtime::sync::mpsc::error::TryRecvError;
+#[cfg(feature = "native")]
 pub use spacetimedb_sats::hash;
+#[cfg(feature = "native")]
 use spacetimedb_schema::reducer_name::ReducerName;
 
+#[cfg(feature = "native")]
 use crate::metrics::ExecutionCounters;
 
+#[cfg(feature = "native")]
 /// A message that is processed by the [`spawn_metrics_recorder`] actor.
 /// We use a separate task to record metrics to avoid blocking transactions.
 pub struct MetricsMessage {
@@ -41,12 +65,14 @@ pub struct MetricsMessage {
     counters: Arc<EnumMap<WorkloadType, ExecutionCounters>>,
 }
 
+#[cfg(feature = "native")]
 /// The handle used to send work to the tx metrics recorder.
 #[derive(Clone)]
 pub struct MetricsRecorderQueue {
     tx: spacetimedb_runtime::sync::mpsc::UnboundedSender<MetricsMessage>,
 }
 
+#[cfg(feature = "native")]
 impl MetricsRecorderQueue {
     pub fn send_metrics(
         &self,
@@ -68,6 +94,7 @@ impl MetricsRecorderQueue {
     }
 }
 
+#[cfg(feature = "native")]
 fn record_metrics(
     MetricsMessage {
         reducer,
@@ -98,6 +125,7 @@ fn record_metrics(
     }
 }
 
+#[cfg(feature = "native")]
 /// The metrics recorder is a side channel that the main database thread forwards metrics to.
 /// While we want to avoid unnecessary compute on the critical path, communicating with other
 /// threads is not free, and for this case in particular waking a parked task is not free.
@@ -113,6 +141,7 @@ fn record_metrics(
 /// every 5ms.
 const TX_METRICS_RECORDING_INTERVAL: std::time::Duration = std::time::Duration::from_millis(5);
 
+#[cfg(feature = "native")]
 /// Spawns a task for recording transaction metrics.
 /// Returns the handle for pushing metrics to the recorder.
 pub fn spawn_tx_metrics_recorder(

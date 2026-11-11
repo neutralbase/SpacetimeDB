@@ -1,31 +1,50 @@
+use std::num::NonZeroU64;
+#[cfg(feature = "fs")]
 use std::{
     io,
-    num::NonZeroU64,
     ops::RangeBounds,
     sync::{Arc, RwLock},
 };
 
+#[cfg(feature = "fs")]
 use log::trace;
+#[cfg(feature = "fs")]
 use repo::{fs::OnNewSegmentFn, Repo};
+#[cfg(feature = "fs")]
 use spacetimedb_paths::server::CommitLogDir;
 
+#[cfg(feature = "fs")]
 pub use spacetimedb_fs_utils::compression::CompressionStats;
 
+// Without `fs`, the crate is the record format only: the payload (`Txdata`, `Encode`,
+// `Decoder`), `Transaction` and the error types, for durability implementations that keep the
+// log somewhere other than segment files (e.g. a host database on wasm32).
+#[cfg(feature = "fs")]
 pub mod commit;
+#[cfg(feature = "fs")]
 pub mod commitlog;
+#[cfg(feature = "fs")]
 mod index;
+#[cfg(feature = "fs")]
 pub mod repo;
+#[cfg(feature = "fs")]
 pub mod segment;
 mod varchar;
 mod varint;
 
+/// The log format version written by this version of the crate.
+pub const DEFAULT_LOG_FORMAT_VERSION: u8 = 1;
+
+#[cfg(feature = "fs")]
 use crate::segment::Committed;
+#[cfg(feature = "fs")]
 pub use crate::{
     commit::{Commit, StoredCommit},
     commitlog::CommittedMeta,
-    payload::{Decoder, Encode},
     repo::{fs::SizeOnDisk, TxOffset},
-    segment::{Transaction, DEFAULT_LOG_FORMAT_VERSION},
+};
+pub use crate::{
+    payload::{Decoder, Encode, Transaction},
     varchar::Varchar,
 };
 pub mod error;
@@ -153,6 +172,7 @@ impl Options {
     }
 }
 
+#[cfg(feature = "fs")]
 /// The canonical commitlog API over a repository backend `R`.
 ///
 /// The default backend is the on-disk filesystem repository
@@ -168,6 +188,7 @@ where
     inner: RwLock<commitlog::Generic<R, T>>,
 }
 
+#[cfg(feature = "fs")]
 impl<T> Commitlog<T, repo::Fs> {
     /// Open the log at root directory `root` with [`Options`].
     ///
@@ -197,6 +218,7 @@ impl<T> Commitlog<T, repo::Fs> {
     }
 }
 
+#[cfg(feature = "fs")]
 impl<T, R> Commitlog<T, R>
 where
     R: Repo,
@@ -432,6 +454,7 @@ where
     }
 }
 
+#[cfg(feature = "fs")]
 impl<T, R> Commitlog<T, R>
 where
     T: Encode,
@@ -607,6 +630,7 @@ where
 /// ```
 ///
 /// Unlike `open`, no segment will be created in an empty `repo`.
+#[cfg(feature = "fs")]
 pub fn committed_meta(root: CommitLogDir) -> io::Result<Option<CommittedMeta>> {
     commitlog::committed_meta(repo::Fs::new(root, None)?)
 }
@@ -616,6 +640,7 @@ pub fn committed_meta(root: CommitLogDir) -> io::Result<Option<CommittedMeta>> {
 ///
 /// Starts the traversal without the upfront I/O imposed by [`Commitlog::open`].
 /// See [`Commitlog::commits`] for more information.
+#[cfg(feature = "fs")]
 pub fn commits(root: CommitLogDir) -> io::Result<impl Iterator<Item = Result<StoredCommit, error::Traversal>>> {
     commits_from(root, 0)
 }
@@ -625,6 +650,7 @@ pub fn commits(root: CommitLogDir) -> io::Result<impl Iterator<Item = Result<Sto
 ///
 /// Starts the traversal without the upfront I/O imposed by [`Commitlog::open`].
 /// See [`Commitlog::commits_from`] for more information.
+#[cfg(feature = "fs")]
 pub fn commits_from(
     root: CommitLogDir,
     offset: u64,
@@ -637,6 +663,7 @@ pub fn commits_from(
 ///
 /// Starts the traversal without the upfront I/O imposed by [`Commitlog::open`].
 /// See [`Commitlog::transactions`] for more information.
+#[cfg(feature = "fs")]
 pub fn transactions<'a, D, T>(
     root: CommitLogDir,
     de: &'a D,
@@ -654,6 +681,7 @@ where
 ///
 /// Starts the traversal without the upfront I/O imposed by [`Commitlog::open`].
 /// See [`Commitlog::transactions_from`] for more information.
+#[cfg(feature = "fs")]
 pub fn transactions_from<'a, D, T>(
     root: CommitLogDir,
     offset: u64,
@@ -672,6 +700,7 @@ where
 ///
 /// Starts the traversal without the upfront I/O imposed by [`Commitlog::open`].
 /// See [`Commitlog::fold_transactions`] for more information.
+#[cfg(feature = "fs")]
 pub fn fold_transactions<D>(root: CommitLogDir, de: D) -> Result<(), D::Error>
 where
     D: Decoder,
@@ -685,6 +714,7 @@ where
 ///
 /// Starts the traversal without the upfront I/O imposed by [`Commitlog::open`].
 /// See [`Commitlog::fold_transactions_from`] for more information.
+#[cfg(feature = "fs")]
 pub fn fold_transactions_from<D>(root: CommitLogDir, offset: u64, de: D) -> Result<(), D::Error>
 where
     D: Decoder,
@@ -693,6 +723,7 @@ where
     commitlog::fold_transactions_from(repo::Fs::new(root, None)?, DEFAULT_LOG_FORMAT_VERSION, offset, de)
 }
 
+#[cfg(feature = "fs")]
 pub fn fold_transaction_range<D>(root: CommitLogDir, range: impl RangeBounds<u64>, de: D) -> Result<(), D::Error>
 where
     D: Decoder,

@@ -8,13 +8,16 @@ license-file = "LICENSE"
 description = "Implementation of the SpacetimeDB commitlog."
 
 [features]
-default = ["serde"]
+default = ["serde", "fs"]
+# The segment-file commitlog (`Commitlog`, `repo::Fs`, the offset index). Without it the crate
+# is the record format only (payload, `Transaction`, errors), which builds for wasm32.
+fs = ["dep:memmap2", "dep:spacetimedb-fs-utils", "dep:spacetimedb-paths", "dep:tempfile"]
 # Enable streaming reads + writes
-streaming = ["dep:async-stream", "dep:bytes", "dep:futures", "dep:tokio", "dep:tokio-util"]
+streaming = ["fs", "dep:async-stream", "dep:bytes", "dep:futures", "dep:tokio", "dep:tokio-util"]
 # Enable types + impls useful for testing
-test = ["dep:env_logger"]
+test = ["fs", "dep:env_logger"]
 # Enable `fallocate` of segments
-fallocate = ["dep:nix"]
+fallocate = ["fs", "dep:nix"]
 
 [dependencies]
 async-stream = { workspace = true, optional = true }
@@ -24,15 +27,15 @@ crc32c.workspace = true
 futures = { workspace = true, optional = true }
 itertools.workspace = true
 log.workspace = true
-memmap2 = "0.9.4"
+memmap2 = { version = "0.9.4", optional = true }
 nix = { workspace = true, optional = true, features = ["fs"] }
 scopeguard.workspace = true
 serde = { workspace = true, optional = true }
-spacetimedb-fs-utils.workspace = true
-spacetimedb-paths.workspace = true
+spacetimedb-fs-utils = { workspace = true, optional = true }
+spacetimedb-paths = { workspace = true, optional = true }
 spacetimedb-primitives.workspace = true
 spacetimedb-sats.workspace = true
-tempfile.workspace = true
+tempfile = { workspace = true, optional = true }
 thiserror.workspace = true
 tokio = { workspace = true, optional = true }
 tokio-util = { workspace = true, optional = true, features = ["io-util"] }

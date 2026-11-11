@@ -7,11 +7,14 @@ pub use mut_tx::{FuncCallType, IndexScanPointOrRange, MutTxId, ViewCallInfo, Vie
 pub mod state_view;
 pub use state_view::{IterByColEqTx, IterByColRangeTx};
 pub mod delete_table;
-#[cfg(feature = "durability")]
+#[cfg(feature = "replay")]
 mod replay;
 mod time;
-#[cfg(feature = "durability")]
+#[cfg(feature = "replay")]
 pub use replay::{apply_history, ApplyHistoryCounters, ErrorBehavior, Replay};
+pub use time::now_timestamp;
+#[cfg(target_arch = "wasm32")]
+pub use time::{install_host_clock, HostClock};
 mod tx;
 pub use tx::{NumDistinctValues, TxId};
 mod tx_state;

@@ -62,7 +62,8 @@ pub fn apply_history(
         }
     };
 
-    let time_before = std::time::Instant::now();
+    // The datastore's clock: `std::time::Instant` panics on wasm32-unknown-unknown.
+    let time_before = super::time::Instant::now();
 
     let mut replay = datastore.replay(
         progress,
