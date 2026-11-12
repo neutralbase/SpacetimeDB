@@ -1,4 +1,6 @@
+#[cfg(feature = "local")]
 pub mod local;
+#[cfg(feature = "local")]
 pub use local::Local;
 
 #[cfg(any(test, feature = "test"))]
@@ -12,8 +14,8 @@ mod testing {
         sync::atomic::{AtomicBool, Ordering},
     };
 
+    use crate::watch;
     use futures::FutureExt as _;
-    use tokio::sync::watch;
 
     use crate::{Close, Durability, DurableOffset, PreparedTx, TxOffset};
 

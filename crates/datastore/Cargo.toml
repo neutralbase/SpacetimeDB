@@ -9,8 +9,8 @@ rust-version.workspace = true
 [dependencies]
 spacetimedb-data-structures.workspace = true
 spacetimedb-lib = { workspace = true, features = ["serde"] }
-spacetimedb-commitlog = { workspace = true, optional = true }
-spacetimedb-durability = { workspace = true, optional = true }
+spacetimedb-commitlog = { path = "../commitlog", version = "=2.16.0", optional = true, default-features = false }
+spacetimedb-durability = { path = "../durability", version = "=2.16.0", optional = true, default-features = false }
 spacetimedb-metrics = { workspace = true, optional = true }
 spacetimedb-primitives.workspace = true
 spacetimedb-paths = { workspace = true, optional = true }
@@ -47,9 +47,16 @@ rand.workspace = true
 # Print a warning when doing an unindexed `iter_by_col_range` on a large table.
 unindexed_iter_by_col_range_warn = []
 metrics = ["dep:prometheus", "dep:spacetimedb-metrics", "spacetimedb-lib/metrics_impls"]
+# The record format (`txdata::Inputs` from a `ReducerContext` and back), without the
+# filesystem commitlog: what a durability implementation needs to build the log record.
+txdata = ["dep:spacetimedb-commitlog"]
+# Replay of a logged history (`apply_history`, `Locking::replay`) over the `History` trait,
+# without the local filesystem durability or snapshots.
+replay = ["txdata", "dep:spacetimedb-durability", "metrics"]
 durability = [
-    "dep:spacetimedb-commitlog",
-    "dep:spacetimedb-durability",
+    "replay",
+    "spacetimedb-commitlog/default",
+    "spacetimedb-durability/default",
     "dep:spacetimedb-paths",
     "dep:spacetimedb-snapshot",
     "metrics",

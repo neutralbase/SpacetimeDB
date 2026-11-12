@@ -69,6 +69,46 @@ fn main() -> Result<()> {
         "wasm32-unknown-unknown"
     )
     .run()?;
+    // The commitlog record format, the durability traits, datastore replay and the engine's
+    // SQL/RLS layer without their filesystem, Tokio and host dependencies.
+    // The engine is checked together with the datastore's `portable` feature, which the
+    // datastore needs on wasm32.
+    let portable_builds: [(&[&str], &str); 4] = [
+        (&["spacetimedb-commitlog"], ""),
+        (&["spacetimedb-durability"], ""),
+        (&["spacetimedb-datastore"], "portable,execution,replay"),
+        (
+            &["spacetimedb-engine", "spacetimedb-datastore"],
+            "spacetimedb-datastore/portable",
+        ),
+    ];
+    for (packages, features) in portable_builds {
+        for subcommand in ["check", "clippy"] {
+            let mut args = vec![subcommand];
+            for package in packages {
+                args.extend(["-p", package]);
+            }
+            args.extend(["--no-default-features", "--target", "wasm32-unknown-unknown"]);
+            if !features.is_empty() {
+                args.extend(["--features", features]);
+            }
+            if subcommand == "clippy" {
+                // `--no-deps`: lint these packages, not every workspace crate they pull in.
+                args.extend(["--no-deps", "--", "-D", "warnings"]);
+            }
+            cmd("cargo", args).run()?;
+        }
+    }
+    // The portable watch only compiles without `local`, so the default test run never sees it.
+    cmd!(
+        "cargo",
+        "test",
+        "-p",
+        "spacetimedb-durability",
+        "--no-default-features",
+        "--lib"
+    )
+    .run()?;
     cmd!("cargo", "test", "-p", "spacetimedb-portable-datastore").run()?;
     cmd!(
         "node",

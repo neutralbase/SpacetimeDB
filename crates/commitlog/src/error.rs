@@ -3,6 +3,7 @@ use std::io;
 use spacetimedb_sats::buffer::DecodeError;
 use thiserror::Error;
 
+#[cfg(feature = "fs")]
 use crate::segment;
 
 /// Error yielded by public commitlog iterators.
@@ -63,6 +64,7 @@ pub struct ChecksumMismatch {
     pub(crate) commit_pos: u64,
 }
 
+#[cfg(feature = "fs")]
 #[derive(Debug, Error)]
 pub enum SegmentMetadata {
     #[error("invalid commit encountered")]
@@ -76,6 +78,7 @@ pub enum SegmentMetadata {
 }
 
 /// Recursively concatenate `e.source()`, separated by ": ".
+#[cfg(feature = "fs")]
 pub(crate) fn source_chain(e: &impl std::error::Error) -> String {
     let mut s = String::new();
     let mut source = e.source();

@@ -8,22 +8,35 @@ license-file = "LICENSE"
 description = "Traits and single-node implementation of durability for SpacetimeDB."
 
 [features]
+default = ["local"]
+# The local, commitlog-on-disk implementation (`Local`) and the Tokio watch behind
+# `DurableOffset`. Without it the crate is the `Durability` / `History` traits over the record
+# format, with a portable watch, which builds for wasm32.
+local = [
+    "dep:async-channel",
+    "dep:spacetimedb-fs-utils",
+    "dep:spacetimedb-paths",
+    "dep:spacetimedb-runtime",
+    "dep:tokio",
+    "dep:tracing",
+    "spacetimedb-commitlog/default",
+]
 test = []
-fallocate = ["spacetimedb-commitlog/fallocate"]
+fallocate = ["local", "spacetimedb-commitlog/fallocate"]
 
 [dependencies]
-async-channel.workspace = true
+async-channel = { workspace = true, optional = true }
 futures.workspace = true
 itertools.workspace = true
 log.workspace = true
 scopeguard.workspace = true
-spacetimedb-commitlog.workspace = true
-spacetimedb-fs-utils.workspace = true
-spacetimedb-paths.workspace = true
-spacetimedb-runtime.workspace = true
+spacetimedb-commitlog = { path = "../commitlog", version = "=2.16.0", default-features = false }
+spacetimedb-fs-utils = { workspace = true, optional = true }
+spacetimedb-paths = { workspace = true, optional = true }
+spacetimedb-runtime = { workspace = true, optional = true }
 thiserror.workspace = true
-tokio.workspace = true
-tracing.workspace = true
+tokio = { workspace = true, optional = true }
+tracing = { workspace = true, optional = true }
 
 [dev-dependencies]
 anyhow.workspace = true

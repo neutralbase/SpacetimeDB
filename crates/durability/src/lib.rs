@@ -2,11 +2,21 @@ use std::{io, iter, marker::PhantomData, sync::Arc};
 
 use futures::future::BoxFuture;
 use thiserror::Error;
-use tokio::sync::watch;
+/// The watch channel behind [`DurableOffset`].
+///
+/// With `local` this is Tokio's. Without it there is no Tokio, and a portable watch with the
+/// same `channel` / `borrow` / `subscribe` / `send_replace` surface takes its place, so the
+/// path `spacetimedb_durability::watch` exists under every feature set.
+#[cfg(feature = "local")]
+pub use tokio::sync::watch;
+#[cfg(not(feature = "local"))]
+pub mod watch;
 
 pub use spacetimedb_commitlog::{error, payload::Txdata, Decoder, Transaction};
 
 mod imp;
+// Empty without `local` and `test`.
+#[allow(unused_imports)]
 pub use imp::*;
 
 /// Transaction offset.

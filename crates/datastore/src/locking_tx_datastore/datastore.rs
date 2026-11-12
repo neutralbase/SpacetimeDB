@@ -4,7 +4,7 @@ use super::{
 #[cfg(feature = "metrics")]
 use crate::db_metrics::DB_METRICS;
 use crate::execution_context::{Workload, WorkloadType};
-#[cfg(feature = "durability")]
+#[cfg(feature = "replay")]
 use crate::locking_tx_datastore::replay::{ErrorBehavior, Replay};
 #[cfg(feature = "durability")]
 use crate::system_tables::system_table_schema;
@@ -125,7 +125,7 @@ impl Locking {
     /// The provided closure will be called for each transaction found in the
     /// history, the parameter is the transaction's offset. The closure is called
     /// _before_ the transaction is applied to the database state.
-    #[cfg(feature = "durability")]
+    #[cfg(feature = "replay")]
     pub fn replay<F: FnMut(u64)>(&self, progress: F, error_behavior: ErrorBehavior) -> Replay<'_, F> {
         let committed_state = self.committed_state.write();
         Replay::new(self.database_identity, committed_state, progress, error_behavior)
@@ -829,6 +829,11 @@ pub trait MetricsRecorder {
 }
 
 impl TxMetrics {
+    /// Monotonic time from the transaction's start to its commit or rollback.
+    pub fn elapsed_time(&self) -> Duration {
+        self.elapsed_time
+    }
+
     /// Compute transaction metrics that we can report once the tx lock is released.
     pub(super) fn new(
         ctx: &ExecutionContext,

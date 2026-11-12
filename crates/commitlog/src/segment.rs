@@ -18,7 +18,7 @@ use crate::{
 
 pub const MAGIC: [u8; 6] = *b"(ds)^2";
 
-pub const DEFAULT_LOG_FORMAT_VERSION: u8 = 1;
+pub use crate::DEFAULT_LOG_FORMAT_VERSION;
 pub const DEFAULT_CHECKSUM_ALGORITHM: u8 = CHECKSUM_ALGORITHM_CRC32C;
 
 pub const CHECKSUM_ALGORITHM_CRC32C: u8 = 0;
@@ -557,23 +557,7 @@ fn validate_commit_at_byte_offset<Reader: io::Read + io::Seek>(
     hdr_or_error
 }
 
-/// Pair of transaction offset and payload.
-///
-/// Created by iterators which "flatten" commits into individual transaction
-/// records.
-#[derive(Debug, PartialEq)]
-pub struct Transaction<T> {
-    /// The offset of this transaction relative to the start of the log.
-    pub offset: u64,
-    /// The transaction payload.
-    pub txdata: T,
-}
-
-impl<T> From<(u64, T)> for Transaction<T> {
-    fn from((offset, txdata): (u64, T)) -> Self {
-        Self { offset, txdata }
-    }
-}
+pub use crate::payload::Transaction;
 
 pub struct Commits<R> {
     pub header: Header,

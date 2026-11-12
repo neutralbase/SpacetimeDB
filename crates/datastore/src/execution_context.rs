@@ -1,14 +1,14 @@
-#[cfg(feature = "durability")]
+#[cfg(feature = "txdata")]
 use std::sync::Arc;
 
 use bytes::Bytes;
 use derive_more::Display;
-#[cfg(feature = "durability")]
+#[cfg(feature = "txdata")]
 use spacetimedb_commitlog::{payload::txdata, Varchar};
 use spacetimedb_lib::{ConnectionId, Identity, Timestamp};
-#[cfg(feature = "durability")]
+#[cfg(feature = "txdata")]
 use spacetimedb_sats::{bsatn, raw_identifier::RawIdentifier};
-#[cfg(feature = "durability")]
+#[cfg(feature = "txdata")]
 use spacetimedb_schema::identifier::Identifier;
 use spacetimedb_schema::reducer_name::ReducerName;
 
@@ -45,7 +45,7 @@ pub struct ReducerContext {
     pub arg_bsatn: Bytes,
 }
 
-#[cfg(feature = "durability")]
+#[cfg(feature = "txdata")]
 impl From<ReducerContext> for txdata::Inputs {
     fn from(
         ReducerContext {
@@ -77,7 +77,7 @@ impl From<ReducerContext> for txdata::Inputs {
     }
 }
 
-#[cfg(feature = "durability")]
+#[cfg(feature = "txdata")]
 impl TryFrom<&txdata::Inputs> for ReducerContext {
     type Error = bsatn::DecodeError;
 

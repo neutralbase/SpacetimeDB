@@ -58,7 +58,7 @@ http-body-util.workspace = true
 humantime.workspace = true
 indexmap.workspace = true
 itertools.workspace = true
-jsonwebtoken.workspace = true
+jsonwebtoken = { workspace = true, features = ["use_pem", "rust_crypto"] }
 lazy_static.workspace = true
 log.workspace = true
 memchr.workspace = true
@@ -137,7 +137,7 @@ spacetimedb-engine = { path = "../engine", features = ["test"] }
 # Also as dev-dependencies for use in _this_ crate's tests.
 proptest.workspace = true
 pretty_assertions.workspace = true
-jsonwebtoken.workspace = true
+jsonwebtoken = { workspace = true, features = ["use_pem", "rust_crypto"] }
 axum.workspace = true
 tokio = { workspace = true, features = ["test-util"] }
 
