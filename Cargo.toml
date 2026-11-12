@@ -270,7 +270,9 @@ is-terminal = "0.4"
 itertools = "0.12"
 itoa = "1"
 json5 = "0.4"
-jsonwebtoken = { version = "11.0.0", features = ["rust_crypto"] }
+# The crypto provider and PEM parsing are chosen per crate: the native crates enable use_pem
+# and rust_crypto; a wasm32 embedder takes neither and installs its own provider.
+jsonwebtoken = { version = "11.0.0", default-features = false }
 junction = "1"
 lazy_static = "1.4.0"
 lean_string = "0.5.1"

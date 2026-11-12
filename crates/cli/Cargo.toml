@@ -49,7 +49,7 @@ itertools.workspace = true
 ignore.workspace = true
 indicatif.workspace = true
 json5.workspace = true
-jsonwebtoken.workspace = true
+jsonwebtoken = { workspace = true, features = ["use_pem", "rust_crypto"] }
 mimalloc.workspace = true
 percent-encoding.workspace = true
 regex.workspace = true
